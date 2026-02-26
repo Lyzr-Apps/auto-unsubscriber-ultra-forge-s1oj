@@ -220,7 +220,7 @@ function loadScanHistory(): ScanHistoryEntry[] {
       const parsed = JSON.parse(stored)
       return Array.isArray(parsed) ? parsed : []
     }
-  } catch {}
+  } catch (_e) { /* ignore */ }
   return []
 }
 
@@ -229,40 +229,7 @@ function saveScanHistory(history: ScanHistoryEntry[]) {
     if (typeof window !== 'undefined') {
       localStorage.setItem('gmail-cleaner-history', JSON.stringify(history))
     }
-  } catch {}
-}
-
-// ---- ERROR BOUNDARY ----
-class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean; error: string }
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props)
-    this.state = { hasError: false, error: '' }
-  }
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error: error.message }
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
-          <div className="text-center p-8 max-w-md">
-            <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
-            <p className="text-muted-foreground mb-4 text-sm">{this.state.error}</p>
-            <button
-              onClick={() => this.setState({ hasError: false, error: '' })}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm"
-            >
-              Try again
-            </button>
-          </div>
-        </div>
-      )
-    }
-    return this.props.children
-  }
+  } catch (_e) { /* ignore */ }
 }
 
 // ---- EMAIL CARD ----
@@ -490,22 +457,21 @@ export default function Page() {
       setUnsubResult(SAMPLE_UNSUB_RESULT)
       setScanHistory(SAMPLE_HISTORY)
     } else {
-      if (view === 'dashboard') {
-        setScanResult(null)
-        setCandidates([])
-        setProtectedEmails([])
-        setUnsubResult(null)
-        setScanHistory(loadScanHistory())
-      }
+      setScanResult(null)
+      setCandidates([])
+      setProtectedEmails([])
+      setUnsubResult(null)
+      setScanHistory(loadScanHistory())
     }
-  }, [showSample, view])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showSample])
 
   // Parse scan response data
   const parseScanResponse = useCallback((rawResult: any): ScanResult | null => {
     try {
       let data = rawResult
       if (typeof data === 'string') {
-        try { data = JSON.parse(data) } catch { return null }
+        try { data = JSON.parse(data) } catch (_e) { return null }
       }
       const resolved = data?.response?.result || data?.result || data?.response || data
       if (!resolved) return null
@@ -517,7 +483,7 @@ export default function Page() {
         protected_emails: Array.isArray(resolved?.protected_emails) ? resolved.protected_emails : [],
         summary: resolved?.summary ?? '',
       }
-    } catch {
+    } catch (_e) {
       return null
     }
   }, [])
@@ -527,7 +493,7 @@ export default function Page() {
     try {
       let data = rawResult
       if (typeof data === 'string') {
-        try { data = JSON.parse(data) } catch { return null }
+        try { data = JSON.parse(data) } catch (_e) { return null }
       }
       const resolved = data?.response?.result || data?.result || data?.response || data
       if (!resolved) return null
@@ -540,7 +506,7 @@ export default function Page() {
         results: Array.isArray(resolved?.results) ? resolved.results : [],
         summary: resolved?.summary ?? '',
       }
-    } catch {
+    } catch (_e) {
       return null
     }
   }, [])
@@ -724,7 +690,6 @@ export default function Page() {
 
   // ---- RENDER ----
   return (
-    <ErrorBoundary>
       <div style={THEME_VARS} className="min-h-screen bg-background text-foreground">
         {/* Gradient Background */}
         <div className="fixed inset-0 pointer-events-none" style={{ background: 'linear-gradient(135deg, hsl(210 20% 97%) 0%, hsl(220 25% 95%) 35%, hsl(200 20% 96%) 70%, hsl(230 15% 97%) 100%)' }} />
@@ -1255,6 +1220,5 @@ export default function Page() {
           </DialogContent>
         </Dialog>
       </div>
-    </ErrorBoundary>
   )
 }
