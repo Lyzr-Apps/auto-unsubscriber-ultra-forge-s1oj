@@ -1,0 +1,62 @@
+{
+  "agent_name": "Inbox Scanner Agent",
+  "agent_id": "69a02c3a46d462ee9ae70432",
+  "description": "Fetches all unopened emails from the past 30 days using Gmail search queries, analyzes each email's sender, subject, and content to categorize it as either \"Protected\" (financial, work, healthcare, government, shopping/orders) or \"Unsubscribe Candidate.\" Returns a structured categorized list for user review.",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "total_scanned": "number",
+    "scan_date": "string",
+    "candidates": [
+      {
+        "email_id": "string",
+        "sender_name": "string",
+        "sender_email": "string",
+        "subject": "string",
+        "date_received": "string",
+        "category": "string",
+        "reason": "string"
+      }
+    ],
+    "protected_emails": [
+      {
+        "email_id": "string",
+        "sender_name": "string",
+        "sender_email": "string",
+        "subject": "string",
+        "date_received": "string",
+        "category": "string",
+        "reason": "string"
+      }
+    ],
+    "summary": "string"
+  },
+  "example_response": {
+    "total_scanned": 0,
+    "scan_date": "sample string",
+    "candidates": [
+      {
+        "email_id": "sample string",
+        "sender_name": "sample string",
+        "sender_email": "sample string",
+        "subject": "sample string",
+        "date_received": "sample string",
+        "category": "sample string",
+        "reason": "sample string"
+      }
+    ],
+    "protected_emails": [
+      {
+        "email_id": "sample string",
+        "sender_name": "sample string",
+        "sender_email": "sample string",
+        "subject": "sample string",
+        "date_received": "sample string",
+        "category": "sample string",
+        "reason": "sample string"
+      }
+    ],
+    "summary": "sample string"
+  }
+}

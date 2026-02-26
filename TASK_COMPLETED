@@ -1,0 +1,22 @@
+UI generation complete for Gmail Inbox Cleaner app.
+
+File written: app/page.tsx
+
+Features implemented:
+- Dashboard view with scan configuration, protected categories, scan CTA, and scan history
+- Review view with two-column layout (candidates vs protected), drag between lists, category filters
+- Summary view with success/failure/manual action counts, detailed results with expandable unsubscribe links
+- Confirmation dialog before unsubscribe
+- Sample data toggle
+- Agent status display
+- Error handling with retry
+- Export report as text file
+- localStorage scan history persistence
+- Full theme application (Slate Light)
+- ErrorBoundary wrapper
+- Markdown renderer for summaries
+- All response schema fields rendered (100% coverage)
+
+Agents:
+- Inbox Scanner Agent (69a02c3a46d462ee9ae70432)
+- Unsubscribe Agent (69a02c3b5f1c147fcddc9b85)

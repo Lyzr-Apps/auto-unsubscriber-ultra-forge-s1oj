@@ -1,0 +1,46 @@
+{
+  "agent_name": "Unsubscribe Agent",
+  "agent_id": "69a02c3b5f1c147fcddc9b85",
+  "description": "Processes approved unsubscribe candidates by fetching full email content, extracting unsubscribe links (from email headers and body), and reporting which emails were successfully processed. Generates a final summary report of all actions taken.",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "total_processed": "number",
+    "successfully_extracted": "number",
+    "no_link_found": "number",
+    "failed": "number",
+    "results": [
+      {
+        "email_id": "string",
+        "sender_name": "string",
+        "sender_email": "string",
+        "subject": "string",
+        "status": "string",
+        "unsubscribe_link": "string",
+        "link_source": "string",
+        "error_message": "string"
+      }
+    ],
+    "summary": "string"
+  },
+  "example_response": {
+    "total_processed": 0,
+    "successfully_extracted": 0,
+    "no_link_found": 0,
+    "failed": 0,
+    "results": [
+      {
+        "email_id": "sample string",
+        "sender_name": "sample string",
+        "sender_email": "sample string",
+        "subject": "sample string",
+        "status": "sample string",
+        "unsubscribe_link": "sample string",
+        "link_source": "sample string",
+        "error_message": "sample string"
+      }
+    ],
+    "summary": "sample string"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "workflow": "Gmail Inbox Cleaner",
+  "pattern": "Multiple Independent Agents",
+  "agents": [
+    {
+      "agent_id": "69a02c3a46d462ee9ae70432",
+      "name": "Inbox Scanner Agent",
+      "type": "independent",
+      "agent_type": "json",
+      "model": "gpt-4.1",
+      "provider": "openai",
+      "temperature": 0.2,
+      "top_p": 1,
+      "tools": ["GMAIL_FETCH_EMAILS", "GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID"],
+      "tool_source": "composio",
+      "trigger": "Scan Inbox button",
+      "response_schema_file": "response_schemas/inbox_scanner_agent_response.json",
+      "image_output_config": null,
+      "voice_config": null,
+      "file_output": false
+    },
+    {
+      "agent_id": "69a02c3b5f1c147fcddc9b85",
+      "name": "Unsubscribe Agent",
+      "type": "independent",
+      "agent_type": "json",
+      "model": "gpt-4.1",
+      "provider": "openai",
+      "temperature": 0.2,
+      "top_p": 1,
+      "tools": ["GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID"],
+      "tool_source": "composio",
+      "trigger": "Unsubscribe All button",
+      "response_schema_file": "response_schemas/unsubscribe_agent_response.json",
+      "image_output_config": null,
+      "voice_config": null,
+      "file_output": false
+    }
+  ],
+  "workflow_nodes": [
+    {"id": "input_node", "type": "Input", "label": "User Input", "nodeCategory": "input"},
+    {"id": "inbox_scanner_agent", "type": "Agent", "label": "Inbox Scanner Agent", "nodeCategory": "agent"},
+    {"id": "unsubscribe_agent", "type": "Agent", "label": "Unsubscribe Agent", "nodeCategory": "agent"},
+    {"id": "output_node", "type": "Output", "label": "Output", "nodeCategory": "end"}
+  ],
+  "workflow_edges": [
+    {"source": "input_node", "target": "inbox_scanner_agent"},
+    {"source": "inbox_scanner_agent", "target": "unsubscribe_agent"},
+    {"source": "unsubscribe_agent", "target": "output_node"}
+  ]
+}
