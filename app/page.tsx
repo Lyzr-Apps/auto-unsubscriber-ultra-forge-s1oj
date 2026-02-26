@@ -166,6 +166,35 @@ const SAMPLE_HISTORY: ScanHistoryEntry[] = [
 ]
 
 // ---- HELPERS ----
+
+// Detect tool_auth errors in agent responses (when Gmail needs authorization)
+function detectToolAuthError(result: any): string | null {
+  try {
+    const fullStr = JSON.stringify(result)
+    if (fullStr.includes('tool_auth')) {
+      return 'Gmail authentication is required. The agent needs permission to access your Gmail. Please connect your Gmail account through the platform and try again.'
+    }
+    // Check for common auth-related messages in the response text
+    const responseMsg =
+      result?.response?.message ||
+      result?.response?.result?.text ||
+      result?.response?.result?.message ||
+      result?.error ||
+      ''
+    const msgStr = typeof responseMsg === 'string' ? responseMsg : JSON.stringify(responseMsg)
+    if (
+      msgStr.toLowerCase().includes('authentication') &&
+      (msgStr.toLowerCase().includes('permission') ||
+       msgStr.toLowerCase().includes('not granted') ||
+       msgStr.toLowerCase().includes('authorize') ||
+       msgStr.toLowerCase().includes('not authenticated'))
+    ) {
+      return msgStr
+    }
+  } catch (_e) { /* ignore */ }
+  return null
+}
+
 function renderMarkdown(text: string) {
   if (!text) return null
   return (
@@ -529,6 +558,13 @@ export default function Page() {
 
       const result = await callAIAgent(message, INBOX_SCANNER_AGENT_ID)
 
+      // Check for tool_auth / authentication errors first
+      const authError = detectToolAuthError(result)
+      if (authError) {
+        setScanError(authError)
+        return
+      }
+
       if (result?.success) {
         const parsed = parseScanResponse(result)
         if (parsed) {
@@ -553,7 +589,9 @@ export default function Page() {
           setScanError('Unable to parse scan results. Please try again.')
         }
       } else {
-        setScanError(result?.error ?? 'Scan failed. Please try again.')
+        // Also check error messages for auth issues
+        const errorAuthMsg = detectToolAuthError({ error: result?.error })
+        setScanError(errorAuthMsg || result?.error || 'Scan failed. Please try again.')
       }
     } catch (err) {
       setScanError(err instanceof Error ? err.message : 'An unexpected error occurred.')
@@ -601,6 +639,13 @@ export default function Page() {
 
       const result = await callAIAgent(message, UNSUBSCRIBE_AGENT_ID)
 
+      // Check for tool_auth / authentication errors first
+      const authError = detectToolAuthError(result)
+      if (authError) {
+        setUnsubError(authError)
+        return
+      }
+
       if (result?.success) {
         const parsed = parseUnsubResponse(result)
         if (parsed) {
@@ -610,7 +655,8 @@ export default function Page() {
           setUnsubError('Unable to parse unsubscribe results. Please try again.')
         }
       } else {
-        setUnsubError(result?.error ?? 'Unsubscribe process failed. Please try again.')
+        const errorAuthMsg = detectToolAuthError({ error: result?.error })
+        setUnsubError(errorAuthMsg || result?.error || 'Unsubscribe process failed. Please try again.')
       }
     } catch (err) {
       setUnsubError(err instanceof Error ? err.message : 'An unexpected error occurred.')
@@ -819,17 +865,41 @@ export default function Page() {
 
                 {/* Scan Error */}
                 {scanError && (
-                  <Card className="border-red-200 bg-red-50/60 backdrop-blur-md">
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-red-800">Scan Failed</p>
-                        <p className="text-xs text-red-600 mt-0.5">{scanError}</p>
+                  <Card className={`backdrop-blur-md ${scanError.toLowerCase().includes('authentication') || scanError.toLowerCase().includes('permission') || scanError.toLowerCase().includes('authorize') ? 'border-amber-300 bg-amber-50/60' : 'border-red-200 bg-red-50/60'}`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        {scanError.toLowerCase().includes('authentication') || scanError.toLowerCase().includes('permission') || scanError.toLowerCase().includes('authorize') ? (
+                          <Shield className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                        ) : (
+                          <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                        )}
+                        <div className="flex-1">
+                          {scanError.toLowerCase().includes('authentication') || scanError.toLowerCase().includes('permission') || scanError.toLowerCase().includes('authorize') ? (
+                            <>
+                              <p className="text-sm font-medium text-amber-800">Gmail Authorization Required</p>
+                              <p className="text-xs text-amber-700 mt-1">{scanError}</p>
+                              <div className="mt-3 p-3 rounded-lg bg-amber-100/50 border border-amber-200">
+                                <p className="text-xs text-amber-800 font-medium mb-1">How to connect Gmail:</p>
+                                <ol className="text-xs text-amber-700 space-y-1 list-decimal ml-4">
+                                  <li>Go to your Lyzr Studio workspace</li>
+                                  <li>Find the Tool Connections / Integrations section</li>
+                                  <li>Click Connect for Gmail and authorize access</li>
+                                  <li>Return here and click Scan Inbox again</li>
+                                </ol>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-sm font-medium text-red-800">Scan Failed</p>
+                              <p className="text-xs text-red-600 mt-0.5">{scanError}</p>
+                            </>
+                          )}
+                        </div>
+                        <Button variant="outline" size="sm" onClick={handleScan} className="flex-shrink-0">
+                          <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                          Retry
+                        </Button>
                       </div>
-                      <Button variant="outline" size="sm" onClick={handleScan} className="flex-shrink-0">
-                        <RefreshCw className="h-3.5 w-3.5 mr-1" />
-                        Retry
-                      </Button>
                     </CardContent>
                   </Card>
                 )}
