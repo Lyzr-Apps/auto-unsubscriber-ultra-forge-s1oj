@@ -736,7 +736,7 @@ export default function Page() {
 
   // ---- RENDER ----
   return (
-      <div style={THEME_VARS} className="min-h-screen bg-background text-foreground">
+    <div style={THEME_VARS} className="min-h-screen bg-background text-foreground">
         {/* Gradient Background */}
         <div className="fixed inset-0 pointer-events-none" style={{ background: 'linear-gradient(135deg, hsl(210 20% 97%) 0%, hsl(220 25% 95%) 35%, hsl(200 20% 96%) 70%, hsl(230 15% 97%) 100%)' }} />
 
